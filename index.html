@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sami's World Clock</title>
+    <script src="https://moment.github.io/luxon/global/luxon.min.js"></script>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        #clock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        #analog-clock {
+            width: 200px;
+            height: 200px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            position: relative;
+            background-color: #2c2c2c;
+        }
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            background-color: #ffffff;
+        }
+        #hour-hand {
+            width: 6px;
+            height: 60px;
+            transform: translateX(-50%) rotate(0deg);
+        }
+        #minute-hand {
+            width: 4px;
+            height: 80px;
+            transform: translateX(-50%) rotate(0deg);
+        }
+        #second-hand {
+            width: 2px;
+            height: 90px;
+            background-color: #ff4d4d;
+            transform: translateX(-50%) rotate(0deg);
+        }
+        #digital-clock {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        #timezone-input {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 1em;
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 5px;
+        }
+        #error-message {
+            color: #ff4d4d;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sami's World Clock</h1>
+    <div id="clock-container">
+        <div id="analog-clock">
+            <div id="hour-hand" class="hand"></div>
+            <div id="minute-hand" class="hand"></div>
+            <div id="second-hand" class="hand"></div>
+        </div>
+        <div id="digital-clock"></div>
+        <input type="text" id="timezone-input" placeholder="Enter timezone (e.g., Asia/Tokyo)">
+        <div id="error-message"></div>
+    </div>
+
+    <script>
+        const { DateTime } = luxon;
+        let currentTimezone = 'Asia/Kolkata'; // Default to India
+
+        function updateClock() {
+            const now = DateTime.now().setZone(currentTimezone);
+            const hours = now.hour % 12;
+            const minutes = now.minute;
+            const seconds = now.second;
+
+            // Update analog clock
+            const hourDeg = (hours + minutes / 60) * 30;
+            const minuteDeg = minutes * 6;
+            const secondDeg = seconds * 6;
+
+            document.getElementById('hour-hand').style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+            document.getElementById('minute-hand').style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+            document.getElementById('second-hand').style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+
+            // Update digital clock
+            document.getElementById('digital-clock').textContent = now.toFormat('HH:mm:ss');
+
+            // Update every second
+            setTimeout(updateClock, 1000);
+        }
+
+        function setTimezone(timezone) {
+            const validTimezones = Intl.supportedValuesOf('timeZone');
+            if (validTimezones.includes(timezone)) {
+                currentTimezone = timezone;
+                document.getElementById('error-message').style.display = 'none';
+                updateClock();
+            } else {
+                document.getElementById('error-message').textContent = 'Invalid timezone! Please enter a valid timezone (e.g., Asia/Tokyo).';
+                document.getElementById('error-message').style.display = 'block';
+            }
+        }
+
+        // Handle timezone input
+        document.getElementById('timezone-input').addEventListener('change', (e) => {
+            setTimezone(e.target.value);
+        });
+
+        // Initialize clock
+        updateClock();
+    </script>
+</body>
+</html>
